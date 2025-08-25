@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Firebase Push Token Test</title>
+    <script type="module">
+      // Import Firebase SDKs
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+      import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js";
+
+      // Your Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyCHh0BlMhOIWeNrErttmxK1D2vR4IkXgBU",
+        authDomain: "demoproject-2f4cb.firebaseapp.com",
+        projectId: "demoproject-2f4cb",
+        storageBucket: "demoproject-2f4cb.appspot.com", 
+        messagingSenderId: "371774821665",
+        appId: "1:371774821665:web:89d8509e16f039a6f29a60",
+        measurementId: "G-KJBYN1CK4T"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const messaging = getMessaging(app);
+
+      // Replace with your Web Push certificate key from Firebase console
+      const vapidKey = "BEzv1UqdsRu2i3Jhoeu_tDeg1lDp00BsJFiJaXrjsVC7idy1QQMoPOQSijBGwhpn1o-koa2weVjDwekrTFqTIQ8";
+
+      async function requestPermission() {
+        console.log("Requesting permission...");
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+          try {
+            const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+            const token = await getToken(messaging, { 
+              vapidKey,
+              serviceWorkerRegistration: registration 
+            });
+
+            console.log("FCM Token:", token);
+            document.getElementById("token").innerText = token;
+          } catch (error) {
+            console.error("Error getting token:", error);
+          }
+        } else {
+          console.log("Permission not granted for notifications.");
+        }
+      }
+
+      window.onload = () => {
+        document.getElementById("getTokenBtn").addEventListener("click", requestPermission);
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Firebase Push Token Test</h1>
+    <button id="getTokenBtn">Get FCM Token</button>
+    <p><strong>Token:</strong> <span id="token"></span></p>
+  </body>
+</html>
